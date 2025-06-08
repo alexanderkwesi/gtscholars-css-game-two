@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Drag and Drop CSS Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin-top: 10px;
+    }
+
+    header {
+      background: #333;
+      color: white;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+      padding: 20px;
+    }
+
+    .selector-box {
+      background: #e0f7fa;
+      border: 2px dashed #00acc1;
+      width: 250px;
+      min-height: 100px;
+      padding: 10px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .selector-box h3 {
+      margin: 0 0 10px;
+      font-size: 1.1em;
+    }
+
+    .css-snippet {
+      background: #fff3cd;
+      border: 1px solid #f0ad4e;
+      padding: 8px 12px;
+      margin: 10px;
+      cursor: grab;
+      border-radius: 5px;
+      font-family: monospace;
+    }
+
+    .drop-here {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #fafafa;
+      min-height: 40px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .correct {
+      background-color: #d4edda;
+      border-color: #28a745;
+    }
+
+    .message {
+      font-size: 1.2em;
+      margin-top: 20px;
+    }
+
+    footer {
+      margin-top: 40px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎨 Match the CSS Rule to the Selector!</h1>
+  <p>Drag the correct CSS rule to its matching selector.</p>
+</header>
+
+<div class="container">
+  <!-- CSS Selector Boxes -->
+  <div class="selector-box" data-correct=".dino-options">
+    <h3>.dino-options</h3>
+    <div class="drop-here"></div>
+  </div>
+
+  <div class="selector-box" data-correct="#game-container">
+    <h3>#game-container</h3>
+    <div class="drop-here"></div>
+  </div>
+
+  <div class="selector-box" data-correct=".btn-show">
+    <h3>.btn-show</h3>
+    <div class="drop-here"></div>
+  </div>
+
+  <div class="selector-box" data-correct=".level-up">
+    <h3>.level-up</h3>
+    <div class="drop-here"></div>
+  </div>
+
+  <div class="selector-box" data-correct=".dino:hover">
+    <h3>.dino:hover</h3>
+    <div class="drop-here"></div>
+  </div>
+</div>
+
+<!-- Draggable CSS Code Snippets -->
+<div class="container">
+  <div class="css-snippet" draggable="true" id="css1">display: flex; justify-content: center; gap: 20px; margin: 20px;</div>
+  <div class="css-snippet" draggable="true" id="css2">margin-top: 20px;</div>
+  <div class="css-snippet" draggable="true" id="css3">background-color: aqua; width: 90px; height: 40px; padding: 5px; cursor: pointer;</div>
+  <div class="css-snippet" draggable="true" id="css4">transform: scale(1.05);</div>
+  <div class="css-snippet" draggable="true" id="css5">position: absolute; top: 40%; left: 50%; transform: translateX(-50%); font-size: 48px; font-weight: bold; color: #ffeb3b; text-shadow: 2px 2px #000; z-index: 9999;</div>
+</div>
+
+<div id="btn" style="display:flex; flex-direction:column; text-align:center; width:100%; height:90px; align-self:center; justify-self:center; margin:30px;"></div>
+<div class="message" id="message"></div>
+
+<footer>
+  🧑‍💻 Learn CSS the fun way!
+</footer>
+
+<script>
+  const draggables = document.querySelectorAll(".css-snippet");
+  const dropZones = document.querySelectorAll(".drop-here");
+  const message = document.getElementById("message");
+  const btn = document.getElementById("btn");
+
+  draggables.forEach(snippet => {
+    snippet.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/plain", snippet.innerText);
+    });
+  });
+
+  dropZones.forEach(zone => {
+    const box = zone.closest(".selector-box");
+    const correctCSS = {
+      ".dino-options": "display: flex; justify-content: center; gap: 20px; margin: 20px;",
+      "#game-container": "margin-top: 20px;",
+      ".btn-show": "background-color: aqua; width: 90px; height: 40px; padding: 5px; cursor: pointer;",
+      ".dino:hover": "transform: scale(1.05);",
+      ".level-up": "position: absolute; top: 40%; left: 50%; transform: translateX(-50%); font-size: 48px; font-weight: bold; color: #ffeb3b; text-shadow: 2px 2px #000; z-index: 9999;"
+    };
+
+    zone.addEventListener("dragover", e => {
+      e.preventDefault();
+      zone.style.backgroundColor = "#e0ffe0";
+    });
+
+    zone.addEventListener("dragleave", () => {
+      zone.style.backgroundColor = "#fafafa";
+    });
+
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+      const droppedText = e.dataTransfer.getData("text/plain");
+      const selector = box.getAttribute("data-correct");
+      zone.innerText = droppedText;
+      zone.style.backgroundColor = "#fafafa";
+
+      if (droppedText === correctCSS[selector]) {
+        zone.classList.add("correct");
+        checkWin();
+      } else {
+        message.innerText = "❌ One or more drops are incorrect. Try again!";
+        message.style.color = "red";
+      }
+    });
+  });
+
+  function checkWin() {
+    const allCorrect = [...dropZones].every(zone => zone.classList.contains("correct"));
+
+    if (allCorrect) {
+      message.innerText = "✅ Well done! All CSS rules are matched correctly!";
+      message.style.color = "green";
+      btn.innerHTML += "<br><br><p><a id='a_id' href='index_two.html' style='background-color:skyblue; width:300px; height:70px; cursor:pointer; font-family:Arial; font-weight:bolder; color:white; text-align:center; border:3px solid lightdarkgrey; padding:10px; margin:50px; text-decoration:none;'>Go to the Next Questions</a></p>";
+    }
+  }
+  
+</script>
+
+</body>
+</html>
